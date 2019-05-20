@@ -9,7 +9,7 @@ class MainService : BaseService() {
     override fun onCreate() {
         super.onCreate()
         acquireWakeLock()
-        startForeground(1, "Фоновая переписка VK", R.drawable.ic_vk)
+        startForeground(1, "Фоновая переписка VK", R.drawable.ic_cloud_queue_white_24dp)
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {

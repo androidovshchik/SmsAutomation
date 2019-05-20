@@ -36,6 +36,10 @@
             android:name=".receivers.ServiceReceiver"
             android:enabled="true"></receiver>
         <receiver
+            android:name=".receivers.ToastReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
             android:name=".receivers.RebootReceiver"
             android:enabled="true">
             <intent-filter android:priority="9999">

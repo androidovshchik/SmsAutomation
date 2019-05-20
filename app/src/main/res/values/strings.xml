@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Sms Restroom</string>
+    <string name="action_settings">URL</string>
+    <string name="action_permissions">Permissions</string>
+    <string name="action_start">Start</string>
+    <string name="action_stop">Stop</string>
+    <string name="preference_file_key">setttings</string>
+</resources>

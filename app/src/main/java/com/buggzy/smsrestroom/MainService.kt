@@ -1,11 +1,15 @@
 package com.buggzy.smsrestroom
 
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Telephony
 import android.text.TextUtils
 import com.buggzy.smsrestroom.base.BaseService
-import com.buggzy.smsrestroom.extensions.*
+import com.buggzy.smsrestroom.extensions.androidId
+import com.buggzy.smsrestroom.extensions.areGranted
+import com.buggzy.smsrestroom.extensions.cancelAlarm
+import com.buggzy.smsrestroom.extensions.createAlarm
 import com.buggzy.smsrestroom.receivers.ServiceReceiver
 import com.doctoror.rxcursorloader.RxCursorLoader
 import io.reactivex.Observable
@@ -105,7 +109,7 @@ class MainService : BaseService() {
                 showToast("Не задана ссылка")
                 return false
             }
-            if (!areGranted(*allAppPermissions)) {
+            if (!areGranted(Manifest.permission.READ_SMS)) {
                 Timber.w("Hasn't permissions")
                 showToast("Отстуствуют разрешения")
                 return false

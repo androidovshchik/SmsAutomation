@@ -6,10 +6,8 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.buggzy.smsrestroom.base.BaseActivity
-import com.buggzy.smsrestroom.extensions.allAppPermissions
-import com.buggzy.smsrestroom.extensions.androidId
-import com.buggzy.smsrestroom.extensions.isServiceRunning
-import com.buggzy.smsrestroom.extensions.restartForegroundService
+import com.buggzy.smsrestroom.extensions.*
+import com.buggzy.smsrestroom.receivers.ServiceReceiver
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -57,6 +55,7 @@ class MainActivity : BaseActivity(), MultiplePermissionsListener {
                 if (Preferences.isRunning) {
                     Preferences.isRunning = false
                     refreshStatusText()
+                    cancelAlarm<ServiceReceiver>()
                     if (activityManager.isServiceRunning<MainService>()) {
                         stopService<MainService>()
                     }

@@ -13,4 +13,9 @@ interface ServerApi {
     @POST
     @FormUrlEncoded
     fun pingStatus(@Url url: String, @Field("android_id") androidId: String?): Observable<Any>
+
+    @POST
+    @FormUrlEncoded
+    fun sendSms(@Url url: String, @Field("android_id") androidId: String?,
+                @Field("from") from: String?, @Field("body") body: String?): Observable<Any>
 }

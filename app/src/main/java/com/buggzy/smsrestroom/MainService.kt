@@ -5,10 +5,7 @@ import android.net.Uri
 import android.provider.Telephony
 import android.text.TextUtils
 import com.buggzy.smsrestroom.base.BaseService
-import com.buggzy.smsrestroom.extensions.allAppPermissions
-import com.buggzy.smsrestroom.extensions.androidId
-import com.buggzy.smsrestroom.extensions.areGranted
-import com.buggzy.smsrestroom.extensions.createAlarm
+import com.buggzy.smsrestroom.extensions.*
 import com.buggzy.smsrestroom.receivers.ServiceReceiver
 import com.doctoror.rxcursorloader.RxCursorLoader
 import io.reactivex.Observable
@@ -26,20 +23,20 @@ class MainService : BaseService() {
 
     private val smsDisposable = CompositeDisposable()
 
-    private var delay = 0L
+    private var delay: Long? = null
 
     private var time = -1L
 
     override fun onCreate() {
         super.onCreate()
         acquireWakeLock()
-        createAlarm<ServiceReceiver>(SERVICE_INTERVAL)
+        createAlarm<ServiceReceiver>(RESTART_INTERVAL)
         startForeground(1, "Фоновая работа", R.drawable.ic_cloud_queue_white_24dp)
     }
 
     @Suppress("DEPRECATION")
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        disposable.add(Observable.interval(PING_INTERVAL, PING_INTERVAL, TimeUnit.MILLISECONDS)
+        disposable.add(Observable.interval(0, PING_INTERVAL, TimeUnit.MILLISECONDS)
             .subscribe {
                 if (!checkConditions()) {
                     return@subscribe
@@ -47,8 +44,11 @@ class MainService : BaseService() {
                 (application as MainApp).api.pingStatus("${Preferences.baseUrl}/path/to/status", androidId)
                     .subscribeOn(Schedulers.io())
                     .subscribe()
+                if () {
+
+                }
                 delay += PING_INTERVAL
-                if (delay >= SERVICE_INTERVAL) {
+                if (delay >= 60_000L) {
                     delay = 0
                     smsDisposable.clear()
                     time = System.currentTimeMillis()
@@ -56,6 +56,10 @@ class MainService : BaseService() {
                         .subscribe { cursor ->
                             cursor.use {
                                 Timber.d("content://sms ${it.count}")
+                                (application as MainApp).api.sendSms("${Preferences.baseUrl}/path/to/sms",
+                                    androidId, "", "")
+                                    .subscribeOn(Schedulers.io())
+                                    .subscribe()
                             }
                         })
                 }
@@ -66,22 +70,18 @@ class MainService : BaseService() {
     private fun checkConditions(): Boolean {
         if (!Preferences.isRunning) {
             Timber.i("Disabled work")
-            Preferences.isRunning = false
+            cancelAlarm<ServiceReceiver>()
             stopWork()
             return false
         }
         if (TextUtils.isEmpty(Preferences.baseUrl)) {
             Timber.w("Invalid URL")
             showToast("Не задана ссылка")
-            Preferences.isRunning = false
-            stopWork()
             return false
         }
         if (!areGranted(*allAppPermissions)) {
             Timber.w("Hasn't permissions")
             showToast("Отстуствуют разрешения")
-            Preferences.isRunning = false
-            stopWork()
             return false
         }
         return true

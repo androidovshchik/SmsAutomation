@@ -55,7 +55,6 @@ class MainService : BaseService() {
                 smsDisposable.clear()
                 lastTime = System.currentTimeMillis()
                 smsDisposable.add(RxCursorLoader.create(contentResolver, smsQuery)
-                    .distinctUntilChanged()
                     .subscribe({ cursor ->
                         cursor.use {
                             Timber.d("content://sms ${it.count}")

@@ -13,6 +13,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 
 class MainService : BaseService() {
 
@@ -25,7 +26,7 @@ class MainService : BaseService() {
 
     private var smsDelay: Long? = null
 
-    private var lastTime = -1L
+    private var lastTime = AtomicLong(-1L)
 
     override fun onCreate() {
         super.onCreate()
@@ -53,7 +54,7 @@ class MainService : BaseService() {
                 Timber.i("Sms delay $smsDelay")
                 smsDelay = 0L
                 smsDisposable.clear()
-                lastTime = System.currentTimeMillis()
+                lastTime.set(System.currentTimeMillis())
                 smsDisposable.add(RxCursorLoader.create(contentResolver, smsQuery)
                     .subscribe({ cursor ->
                         cursor.use {
@@ -67,12 +68,12 @@ class MainService : BaseService() {
                                 return@use
                             }
                             val smsTime = it.getLong(it.getColumnIndexOrThrow(Telephony.Sms.DATE))
-                            if (smsTime <= lastTime) {
+                            if (smsTime <= lastTime.get()) {
                                 Timber.i("Last sms time is earlier or the same: %d <= %d",
-                                    smsTime, lastTime)
+                                    smsTime, lastTime.get())
                                 return@use
                             }
-                            lastTime = smsTime
+                            lastTime.set(smsTime)
                             val from = it.getString(it.getColumnIndexOrThrow(Telephony.Sms.ADDRESS))
                             val body = it.getString(it.getColumnIndexOrThrow(Telephony.Sms.BODY))
                             (application as MainApp).api.sendSms("${Preferences.baseUrl}/path/to/sms",

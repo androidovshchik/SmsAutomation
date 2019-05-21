@@ -16,7 +16,7 @@
         android:maxLines="1"
         android:imeOptions="actionDone"
         android:textColor="#303030"
-        android:hint="Введите ссылку"
+        android:hint="https://example.com"
         android:background="@null" />
 
 </LinearLayout>

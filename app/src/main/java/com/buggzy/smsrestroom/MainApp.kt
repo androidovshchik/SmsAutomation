@@ -35,7 +35,7 @@ class MainApp : Application() {
             .build()
         api = Retrofit.Builder()
             .client(client)
-            .baseUrl(BASE_URL)
+            .baseUrl("$BASE_URL/")
             .addConverterFactory(GsonConverterFactory.create(GsonBuilder()
                 .setLenient()
                 .create()))

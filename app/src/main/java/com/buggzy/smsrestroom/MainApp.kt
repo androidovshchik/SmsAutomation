@@ -22,15 +22,13 @@ class MainApp : Application() {
     override fun onCreate() {
         super.onCreate()
         client = OkHttpClient.Builder().apply {
-            if (BuildConfig.DEBUG) {
-                addInterceptor(HttpLoggingInterceptor { message ->
-                    Timber.tag("NETWORK")
-                        .d(message)
-                }.apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                })
-                addInterceptor(ChuckInterceptor(applicationContext))
-            }
+            addInterceptor(HttpLoggingInterceptor { message ->
+                Timber.tag("NETWORK")
+                    .d(message)
+            }.apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            addInterceptor(ChuckInterceptor(applicationContext))
         }.connectTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

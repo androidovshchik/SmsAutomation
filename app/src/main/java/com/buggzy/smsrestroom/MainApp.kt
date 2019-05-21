@@ -1,8 +1,8 @@
 package com.buggzy.smsrestroom
 
 import android.app.Application
-import com.buggzy.smsrestroom.remote.ServerApi
 import com.google.gson.GsonBuilder
+import com.marcinmoskala.kotlinpreferences.PreferenceHolder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -37,6 +37,7 @@ class MainApp : Application() {
                 .create()))
             .build()
             .create(ServerApi::class.java)
+        PreferenceHolder.setContext(applicationContext)
         Timber.plant(Timber.DebugTree())
     }
 }

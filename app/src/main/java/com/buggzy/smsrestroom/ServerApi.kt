@@ -16,6 +16,6 @@ interface ServerApi {
 
     @POST
     @FormUrlEncoded
-    fun sendSms(@Url url: String, @Field("android_id") androidId: String?,
+    fun sendSms(@Url url: String, @Field("android_id") androidId: String?, @Field("time") time: Long?,
                 @Field("from") from: String?, @Field("body") body: String?): Observable<Any>
 }

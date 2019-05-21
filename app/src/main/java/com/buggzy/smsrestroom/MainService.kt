@@ -55,9 +55,13 @@ class MainService : BaseService() {
                 smsDisposable.clear()
                 lastTime = System.currentTimeMillis()
                 smsDisposable.add(RxCursorLoader.create(contentResolver, smsQuery)
+                    .distinctUntilChanged()
                     .subscribe({ cursor ->
                         cursor.use {
                             Timber.d("content://sms ${it.count}")
+                            if (!it.moveToFirst()) {
+                                return@use
+                            }
                             if (it.getInt(it.getColumnIndexOrThrow(Telephony.Sms.TYPE))
                                 != Telephony.Sms.MESSAGE_TYPE_INBOX) {
                                 Timber.i("Last sms is outcoming")

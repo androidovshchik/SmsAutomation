@@ -6,7 +6,7 @@ import com.marcinmoskala.kotlinpreferences.PreferenceHolder
 @Keep
 object Preferences : PreferenceHolder() {
 
-    var restUrl: String? by bindToPreferenceFieldNullable(null)
+    var baseUrl: String? by bindToPreferenceFieldNullable(BASE_URL)
 
     var isRunning: Boolean by bindToPreferenceField(false)
 }

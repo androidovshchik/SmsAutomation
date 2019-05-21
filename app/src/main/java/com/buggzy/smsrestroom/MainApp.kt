@@ -31,7 +31,7 @@ class MainApp : Application() {
                 .writeTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .build())
-            .baseUrl("http://94.154.13.169/")
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(GsonBuilder()
                 .setLenient()
                 .create()))

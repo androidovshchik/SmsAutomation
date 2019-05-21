@@ -33,16 +33,13 @@ class MainService : BaseService() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        disposable.add(Observable.interval(0, 1, TimeUnit.MINUTES)
-            .subscribe { value: Long ->
+        disposable.add(Observable.interval(0, PING_INTERVAL, TimeUnit.MILLISECONDS)
+            .subscribe {
                 if (!checkConditions()) {
                     return@Observable.interval(0, 1, TimeUnit.MINUTES)
                         .subscribe
                 }
-                val phoneCalls = preferences.getInt(Preferences.PHONE_CALLS)
-                if (phoneCalls >= 0 && !ServiceUtil.isRunning(applicationContext, PhoneService::class.java)) {
-                    startService(Intent(applicationContext, PhoneService::class.java))
-                }
+                (application as MainApp).api
                 smsDisposable.clear()
                 currentTime = System.currentTimeMillis()
                 smsDisposable.add(RxCursorLoader.create(contentResolver, smsQuery)
@@ -71,6 +68,7 @@ class MainService : BaseService() {
     }
 
     override fun onDestroy() {
+        smsDisposable.dispose()
         super.onDestroy()
     }
 }

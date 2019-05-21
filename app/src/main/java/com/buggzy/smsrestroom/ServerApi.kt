@@ -6,10 +6,11 @@ import io.reactivex.Observable
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
+import retrofit2.http.Url
 
 interface ServerApi {
 
     @POST
     @FormUrlEncoded
-    fun pingStatus(@Field("name") name: String): Observable<Any>
+    fun pingStatus(@Url url: String, @Field("name") name: String): Observable<Any>
 }

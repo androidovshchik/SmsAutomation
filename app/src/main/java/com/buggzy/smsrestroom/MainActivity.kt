@@ -68,17 +68,17 @@ class MainActivity : BaseActivity(), MultiplePermissionsListener {
 
     private fun promptForURL() {
         val dialog = AlertDialog.Builder(this).apply {
-            setTitle("REST URL")
+            setTitle("Base URL")
             setView(View.inflate(applicationContext, R.layout.dialog_url, null))
             setNegativeButton(getString(android.R.string.cancel), null)
             setPositiveButton(getString(android.R.string.ok), null)
         }.create()
         dialog.setOnShowListener {
             val input = dialog.input_url
-            input.setText(Preferences.restUrl)
+            input.setText(Preferences.baseUrl)
             input.setSelection(input.text.length)
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                Preferences.restUrl = input.text.toString().trim()
+                Preferences.baseUrl = input.text.toString().trim()
                 refreshStatusText()
                 dialog.cancel()
             }
@@ -89,7 +89,7 @@ class MainActivity : BaseActivity(), MultiplePermissionsListener {
     private fun refreshStatusText() {
         statusText.text = StringBuilder().apply {
             append("Status: ${if (Preferences.isRunning) "Running" else "Stopped"}\n")
-            append("REST URL: ${Preferences.restUrl}\n")
+            append("Base URL: ${Preferences.baseUrl}\n")
         }.toString()
     }
 

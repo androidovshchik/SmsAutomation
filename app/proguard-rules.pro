@@ -2,6 +2,9 @@
 -renamesourcefileattribute SourceFile
 -repackageclasses
 
+-keep class kotlin.reflect.jvm.internal.** { *; }
+-keep interface kotlin.reflect.jvm.internal.** { *; }
+
 # OkHttp 3.X
 -keepattributes Signature
 -keepattributes *Annotation*

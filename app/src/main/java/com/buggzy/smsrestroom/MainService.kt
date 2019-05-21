@@ -36,18 +36,21 @@ class MainService : BaseService() {
 
     @Suppress("DEPRECATION")
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        disposable.add(Observable.interval(0, PING_INTERVAL, TimeUnit.MILLISECONDS)
-            .subscribe {
+        disposable.add(Observable.interval(0L, PING_INTERVAL, TimeUnit.MILLISECONDS)
+            .subscribe({
                 if (!checkConditions()) {
                     return@subscribe
                 }
                 (application as MainApp).api.pingStatus("${Preferences.baseUrl}/path/to/status", androidId)
                     .subscribeOn(Schedulers.io())
                     .subscribe({}, {})
-                smsDelay = if (smsDelay == null) 0L else (smsDelay ?: 0L) + PING_INTERVAL
-                if (smsDelay ?: 0L < SMS_TIMEOUT) {
-                    return@subscribe
+                if (smsDelay != null) {
+                    smsDelay = (smsDelay ?: 0L) + PING_INTERVAL
+                    if (smsDelay ?: 0L < SMS_TIMEOUT) {
+                        return@subscribe
+                    }
                 }
+                Timber.i("Sms delay $smsDelay")
                 smsDelay = 0L
                 smsDisposable.clear()
                 lastTime = System.currentTimeMillis()
@@ -78,7 +81,10 @@ class MainService : BaseService() {
                         Timber.e(it)
                         showToast(it.message.toString())
                     }))
-            })
+            }, {
+                Timber.e(it)
+                showToast(it.message.toString())
+            }))
         return START_NOT_STICKY
     }
 

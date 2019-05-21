@@ -1,12 +1,10 @@
 package com.buggzy.smsrestroom
 
-import androidx.annotation.Keep
 import com.marcinmoskala.kotlinpreferences.PreferenceHolder
 
-@Keep
 object Preferences : PreferenceHolder() {
 
-    var baseUrl: String? by bindToPreferenceFieldNullable(BASE_URL)
+    var baseUrl: String by bindToPreferenceField(BASE_URL, "baseUrl")
 
-    var isRunning: Boolean by bindToPreferenceField(false)
+    var isRunning: Boolean by bindToPreferenceField(false, "isRunning")
 }

@@ -26,7 +26,7 @@ class MainApp : Application() {
                     Timber.tag("NETWORK")
                         .d(message)
                 }.apply {
-                    level = HttpLoggingInterceptor.Level.BODY
+                    level = HttpLoggingInterceptor.Level.BASIC
                 })
             }
         }.connectTimeout(10, TimeUnit.SECONDS)

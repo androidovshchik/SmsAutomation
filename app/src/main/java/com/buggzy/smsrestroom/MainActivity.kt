@@ -25,6 +25,15 @@ class MainActivity : BaseActivity(), MultiplePermissionsListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        if (Preferences.isRunning) {
+            if (!activityManager.isServiceRunning<MainService>()) {
+                startForegroundService<MainService>()
+            }
+        } else {
+            if (activityManager.isServiceRunning<MainService>()) {
+                stopService<MainService>()
+            }
+        }
         refreshStatusText()
         Dexter.withActivity(this)
             .withPermissions(*allAppPermissions)

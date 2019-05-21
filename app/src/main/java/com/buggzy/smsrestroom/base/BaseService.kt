@@ -9,11 +9,14 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.os.PowerManager
-import androidovshchik.common.extensions.SILENT_CHANNEL_ID
-import androidovshchik.common.extensions.createSilentChannel
 import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat
+import com.buggzy.smsrestroom.extensions.SILENT_CHANNEL_ID
+import com.buggzy.smsrestroom.extensions.createSilentChannel
+import com.buggzy.smsrestroom.receivers.EXTRA_MESSAGE
+import com.buggzy.smsrestroom.receivers.ToastReceiver
 import io.reactivex.disposables.CompositeDisposable
+import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.notificationManager
 import org.jetbrains.anko.powerManager
 
@@ -48,6 +51,12 @@ open class BaseService : Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         return START_NOT_STICKY
+    }
+
+    protected fun showToast(message: String) {
+        sendBroadcast(intentFor<ToastReceiver>().apply {
+            putExtra(EXTRA_MESSAGE, message)
+        })
     }
 
     protected fun stopWork() {

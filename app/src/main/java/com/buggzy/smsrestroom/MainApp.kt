@@ -3,6 +3,7 @@ package com.buggzy.smsrestroom
 import android.app.Application
 import com.google.gson.GsonBuilder
 import com.marcinmoskala.kotlinpreferences.PreferenceHolder
+import com.readystatesoftware.chuck.ChuckInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -28,6 +29,7 @@ class MainApp : Application() {
                 }.apply {
                     level = HttpLoggingInterceptor.Level.BODY
                 })
+                addInterceptor(ChuckInterceptor(applicationContext))
             }
         }.connectTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)

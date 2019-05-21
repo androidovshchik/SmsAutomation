@@ -5,6 +5,8 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.Telephony
 import com.buggzy.smsrestroom.base.BaseService
+import com.buggzy.smsrestroom.extensions.createAlarm
+import com.buggzy.smsrestroom.receivers.ServiceReceiver
 import com.doctoror.rxcursorloader.RxCursorLoader
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -26,7 +28,8 @@ class MainService : BaseService() {
     override fun onCreate() {
         super.onCreate()
         acquireWakeLock()
-        startForeground(1, "Фоновая переписка VK", R.drawable.ic_cloud_queue_white_24dp)
+        createAlarm<ServiceReceiver>(SERVICE_INTERVAL)
+        startForeground(1, "Фоновая работа", R.drawable.ic_cloud_queue_white_24dp)
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {

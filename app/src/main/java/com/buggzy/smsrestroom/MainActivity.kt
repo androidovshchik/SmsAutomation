@@ -1,13 +1,14 @@
 package com.buggzy.smsrestroom
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.buggzy.smsrestroom.base.BaseActivity
 import com.buggzy.smsrestroom.extensions.allAppPermissions
+import com.buggzy.smsrestroom.extensions.isServiceRunning
+import com.buggzy.smsrestroom.extensions.restartForegroundService
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -16,6 +17,8 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.dialog_url.*
+import org.jetbrains.anko.activityManager
+import org.jetbrains.anko.stopService
 
 class MainActivity : BaseActivity(), MultiplePermissionsListener {
 
@@ -45,6 +48,7 @@ class MainActivity : BaseActivity(), MultiplePermissionsListener {
                 if (!Preferences.isRunning) {
                     Preferences.isRunning = true
                     refreshStatusText()
+                    restartForegroundService<MainService>()
                 }
                 true
             }
@@ -52,6 +56,9 @@ class MainActivity : BaseActivity(), MultiplePermissionsListener {
                 if (Preferences.isRunning) {
                     Preferences.isRunning = false
                     refreshStatusText()
+                    if (activityManager.isServiceRunning<MainService>()) {
+                        stopService<MainService>()
+                    }
                 }
                 true
             }
@@ -70,14 +77,10 @@ class MainActivity : BaseActivity(), MultiplePermissionsListener {
             val input = dialog.input_url
             input.setText(Preferences.restUrl)
             input.setSelection(input.text.length)
-            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            positiveButton.setOnClickListener {
-                val url = input.text.toString().trim()
-                if (!TextUtils.isEmpty(url)) {
-                    Preferences.restUrl = url
-                    refreshStatusText()
-                    dialog.cancel()
-                }
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                Preferences.restUrl = input.text.toString().trim()
+                refreshStatusText()
+                dialog.cancel()
             }
         }
         dialog.show()
@@ -85,7 +88,7 @@ class MainActivity : BaseActivity(), MultiplePermissionsListener {
 
     private fun refreshStatusText() {
         statusText.text = StringBuilder().apply {
-            append("Status: " + if (Preferences.isRunning) "Running" else "Stopped" + "\n")
+            append("Status: ${if (Preferences.isRunning) "Running" else "Stopped"}\n")
             append("REST URL: ${Preferences.restUrl}\n")
         }.toString()
     }

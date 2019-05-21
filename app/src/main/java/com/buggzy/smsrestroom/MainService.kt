@@ -1,10 +1,13 @@
 package com.buggzy.smsrestroom
 
 import android.content.Intent
-import android.database.Cursor
 import android.net.Uri
 import android.provider.Telephony
+import android.text.TextUtils
 import com.buggzy.smsrestroom.base.BaseService
+import com.buggzy.smsrestroom.extensions.allAppPermissions
+import com.buggzy.smsrestroom.extensions.androidId
+import com.buggzy.smsrestroom.extensions.areGranted
 import com.buggzy.smsrestroom.extensions.createAlarm
 import com.buggzy.smsrestroom.receivers.ServiceReceiver
 import com.doctoror.rxcursorloader.RxCursorLoader
@@ -32,39 +35,48 @@ class MainService : BaseService() {
         startForeground(1, "Фоновая работа", R.drawable.ic_cloud_queue_white_24dp)
     }
 
+    @Suppress("DEPRECATION")
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         disposable.add(Observable.interval(0, PING_INTERVAL, TimeUnit.MILLISECONDS)
             .subscribe {
                 if (!checkConditions()) {
-                    return@Observable.interval(0, 1, TimeUnit.MINUTES)
-                        .subscribe
+                    return@subscribe
                 }
-                (application as MainApp).api
+                (application as MainApp).api.pingStatus("${Preferences.baseUrl}/status", androidId)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe()
                 smsDisposable.clear()
                 currentTime = System.currentTimeMillis()
                 smsDisposable.add(RxCursorLoader.create(contentResolver, smsQuery)
-                    .subscribeOn(Schedulers.io())
-                    .subscribeWith(object : Subscriber<Cursor>() {
+                    .subscribe {
 
-                        fun onNext(cursor: Cursor) {
-                            Timber.d("content://sms " + cursor.count)
-                            try {
-                                if (cursor.moveToFirst() && doesMatchSMS(cursor)) {
-                                    if (ServiceUtil.isRunning(applicationContext, PhoneService::class.java)) {
-                                        stopService(Intent(applicationContext, PhoneService::class.java))
-                                    }
-                                    preferences.putInt(Preferences.PHONE_CALLS, 0)
-                                    startService(Intent(applicationContext, PhoneService::class.java))
-                                }
-                            } catch (e: Exception) {
-                                Timber.e(e)
-                            } finally {
-                                cursor.close()
-                            }
-                        }
-                    }))
+                    })
             })
         return START_NOT_STICKY
+    }
+
+    private fun checkConditions(): Boolean {
+        if (!Preferences.isRunning) {
+            Timber.i("Disabled work")
+            Preferences.isRunning = false
+            stopWork()
+            return false
+        }
+        if (TextUtils.isEmpty(Preferences.baseUrl)) {
+            Timber.w("Invalid URL")
+            showToast("Не задана ссылка")
+            Preferences.isRunning = false
+            stopWork()
+            return false
+        }
+        if (!areGranted(*allAppPermissions)) {
+            Timber.w("Hasn't permissions")
+            showToast("Отстуствуют разрешения")
+            Preferences.isRunning = false
+            stopWork()
+            return false
+        }
+        return true
     }
 
     override fun onDestroy() {

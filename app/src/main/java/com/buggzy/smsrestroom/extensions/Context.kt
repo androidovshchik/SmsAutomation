@@ -6,6 +6,7 @@
 
 package com.buggzy.smsrestroom.extensions
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -17,6 +18,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.preference.PreferenceManager
+import android.provider.Settings
 import android.widget.Toast
 import androidx.core.content.PermissionChecker.PermissionResult
 import com.buggzy.smsrestroom.receivers.EXTRA_DURATION
@@ -33,6 +35,10 @@ val Context.allAppPermissions: Array<String>
 
 val Context.launchAppIntent: Intent
     get() = packageManager.getLaunchIntentForPackage(packageName) ?: Intent()
+
+val Context.androidId: String?
+    @SuppressLint("HardwareIds")
+    get() = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 
 fun Context.bgToast(message: String, duration: Int = Toast.LENGTH_SHORT) = sendBroadcast(intentFor<ToastReceiver>().apply {
     putExtra(EXTRA_MESSAGE, message)

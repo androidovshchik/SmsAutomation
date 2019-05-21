@@ -12,5 +12,5 @@ interface ServerApi {
 
     @POST
     @FormUrlEncoded
-    fun pingStatus(@Url url: String, @Field("name") name: String): Observable<Any>
+    fun pingStatus(@Url url: String, @Field("android_id") androidId: String?): Observable<Any>
 }

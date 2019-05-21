@@ -7,6 +7,7 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import com.buggzy.smsrestroom.base.BaseActivity
 import com.buggzy.smsrestroom.extensions.allAppPermissions
+import com.buggzy.smsrestroom.extensions.androidId
 import com.buggzy.smsrestroom.extensions.isServiceRunning
 import com.buggzy.smsrestroom.extensions.restartForegroundService
 import com.karumi.dexter.Dexter
@@ -88,7 +89,8 @@ class MainActivity : BaseActivity(), MultiplePermissionsListener {
 
     private fun refreshStatusText() {
         statusText.text = StringBuilder().apply {
-            append("Status: ${if (Preferences.isRunning) "Running" else "Stopped"}\n")
+            append("Android ID: $androidId\n")
+            append("Status: ${if (Preferences.isRunning) "running" else "stopped"}\n")
             append("Base URL: ${Preferences.baseUrl}\n")
         }.toString()
     }

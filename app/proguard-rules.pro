@@ -2,7 +2,7 @@
 -renamesourcefileattribute SourceFile
 -repackageclasses
 
-# OkHttp
+# OkHttp 3.X
 -keepattributes Signature
 -keepattributes *Annotation*
 -keep class okhttp3.** { *; }
@@ -10,7 +10,6 @@
 -dontwarn okhttp3.**
 
 # Retrofit 2.X
-## https://square.github.io/retrofit/ ##
 -dontwarn retrofit2.**
 -keep class retrofit2.** { *; }
 -keepattributes Signature

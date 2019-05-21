@@ -25,6 +25,7 @@ import com.buggzy.smsrestroom.receivers.EXTRA_DURATION
 import com.buggzy.smsrestroom.receivers.EXTRA_MESSAGE
 import com.buggzy.smsrestroom.receivers.ToastReceiver
 import org.jetbrains.anko.*
+import timber.log.Timber
 
 val Context.preferences: SharedPreferences
     get() = PreferenceManager.getDefaultSharedPreferences(applicationContext)
@@ -39,6 +40,14 @@ val Context.launchAppIntent: Intent
 val Context.androidId: String?
     @SuppressLint("HardwareIds")
     get() = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+
+val Context.isTimeResolved: Boolean
+    get() = try {
+        Settings.Global.getInt(contentResolver, Settings.Global.AUTO_TIME) != 0
+    } catch (e: Settings.SettingNotFoundException) {
+        Timber.e(e)
+        false
+    }
 
 fun Context.bgToast(message: String, duration: Int = Toast.LENGTH_SHORT) = sendBroadcast(intentFor<ToastReceiver>().apply {
     putExtra(EXTRA_MESSAGE, message)

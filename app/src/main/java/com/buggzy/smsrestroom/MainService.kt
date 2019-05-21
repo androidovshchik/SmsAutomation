@@ -38,7 +38,7 @@ class MainService : BaseService() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         disposable.add(Observable.interval(0L, PING_INTERVAL, TimeUnit.MILLISECONDS)
             .subscribe({
-                if (!checkConditions()) {
+                if (!hasConditions) {
                     return@subscribe
                 }
                 (application as MainApp).api.pingStatus("${Preferences.baseUrl}/path/to/status", androidId)
@@ -91,25 +91,26 @@ class MainService : BaseService() {
         return START_NOT_STICKY
     }
 
-    private fun checkConditions(): Boolean {
-        if (!Preferences.isRunning) {
-            Timber.i("Disabled work")
-            cancelAlarm<ServiceReceiver>()
-            stopWork()
-            return false
+    private val hasConditions: Boolean
+        get() {
+            if (!Preferences.isRunning) {
+                Timber.i("Disabled work")
+                cancelAlarm<ServiceReceiver>()
+                stopWork()
+                return false
+            }
+            if (TextUtils.isEmpty(Preferences.baseUrl)) {
+                Timber.w("Invalid URL")
+                showToast("Не задана ссылка")
+                return false
+            }
+            if (!areGranted(*allAppPermissions)) {
+                Timber.w("Hasn't permissions")
+                showToast("Отстуствуют разрешения")
+                return false
+            }
+            return true
         }
-        if (TextUtils.isEmpty(Preferences.baseUrl)) {
-            Timber.w("Invalid URL")
-            showToast("Не задана ссылка")
-            return false
-        }
-        if (!areGranted(*allAppPermissions)) {
-            Timber.w("Hasn't permissions")
-            showToast("Отстуствуют разрешения")
-            return false
-        }
-        return true
-    }
 
     override fun onDestroy() {
         smsDisposable.dispose()

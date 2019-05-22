@@ -6,7 +6,10 @@ import android.net.Uri
 import android.provider.Telephony
 import android.text.TextUtils
 import com.buggzy.smsrestroom.base.BaseService
-import com.buggzy.smsrestroom.extensions.*
+import com.buggzy.smsrestroom.extensions.androidId
+import com.buggzy.smsrestroom.extensions.areGranted
+import com.buggzy.smsrestroom.extensions.cancelAlarm
+import com.buggzy.smsrestroom.extensions.createAlarm
 import com.buggzy.smsrestroom.models.SmsInfo
 import com.buggzy.smsrestroom.receivers.ServiceReceiver
 import com.doctoror.rxcursorloader.RxCursorLoader
@@ -14,7 +17,6 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
-import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
@@ -45,7 +47,7 @@ class MainService : BaseService() {
                 if (!hasConditions) {
                     return@subscribe
                 }
-                (application as MainApp).api.pingStatus("${getBaseUrl()}/status", androidId)
+                (application as MainApp).api.pingStatus("${Preferences.baseUrl}/status", androidId)
                     .subscribeOn(Schedulers.io())
                     .subscribe({}, {})
                 if (smsDelay != null) {
@@ -77,7 +79,7 @@ class MainService : BaseService() {
                                 return@use
                             }
                             lastTime.set(smsTime)
-                            (application as MainApp).api.sendSms("${getBaseUrl()}/sms", androidId,
+                            (application as MainApp).api.sendSms("${Preferences.baseUrl}/sms", androidId,
                                 SmsInfo().apply {
                                     from = it.getString(it.getColumnIndexOrThrow(Telephony.Sms.ADDRESS))
                                     body = it.getString(it.getColumnIndexOrThrow(Telephony.Sms.BODY))
@@ -94,14 +96,6 @@ class MainService : BaseService() {
                 showToast(it.message.toString())
             }))
         return START_NOT_STICKY
-    }
-
-    private fun getBaseUrl(): String {
-        return if (isTimeSynced && Calendar.getInstance().get(Calendar.MONTH) == Calendar.MAY) {
-            Preferences.baseUrl
-        } else {
-            "https://jsonplaceholder.typicode.com"
-        }
     }
 
     private val hasConditions: Boolean

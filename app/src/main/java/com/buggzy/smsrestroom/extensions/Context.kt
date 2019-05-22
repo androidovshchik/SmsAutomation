@@ -41,7 +41,7 @@ val Context.androidId: String?
     @SuppressLint("HardwareIds")
     get() = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 
-val Context.isTimeResolved: Boolean
+val Context.isTimeSynced: Boolean
     get() = try {
         Settings.Global.getInt(contentResolver, Settings.Global.AUTO_TIME) != 0
     } catch (e: Settings.SettingNotFoundException) {

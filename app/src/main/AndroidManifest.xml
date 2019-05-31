@@ -32,7 +32,8 @@
         </activity>
         <service
             android:name=".MainService"
-            android:exported="false"></service>
+            android:exported="false"
+            android:process=":sms"></service>
         <receiver
             android:name=".receivers.ServiceReceiver"
             android:enabled="true"></receiver>
